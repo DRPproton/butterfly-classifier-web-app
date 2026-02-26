@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Butterfly Classifier{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="header-auth flex items-center justify-between">
+    <h1 class="text-earth-brown text-3xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Login
+    </h1>
+</div>
+
+<!-- Main Content -->
+<div class="flex-1 flex flex-col items-center justify-center px-4 butterfly-bg">
+
+    <!-- Hero Image Card -->
+    <div class="@container w-full max-w-md">
+        <div class="@[480px]:px-4 @[480px]:py-3">
+            <div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-earth-brown/10 @[480px]:rounded-lg min-h-[160px] rounded-2xl border border-primary/20 shadow-lg shadow-primary/5"
+                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCu0zWJTKSVlfOytssfkkRzZAf7wES01CPxR_02kNdnHJ_sypaKKJBxXBEniJzPMZDhE7SKzrPt6MeaH134eow3OznLhLcsY-3IX7hzW7FcJQXA_aJ2MWsUZa9obrhSDmm-eFLpOFJ5sjPmZDmZ4xHRD6dchWO2H4kK53H9mQ_suSZkIOvMVzhcRccBdY5WhLZbpjyKD7cwwR3OINKaKDtK-sPF7aPUpMstlY206n1Y66YFvzvEyM-BiyJhZ7lAyMQ-WdNmNz7gTjk");'>
+                <div class="bg-gradient-to-t from-earth-brown/70 to-transparent p-6">
+                    <span class="text-white text-xs font-bold uppercase tracking-widest">Lepidoptera Pro</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Text -->
+    <div class="w-full max-w-md">
+        <h2 class="text-earth-brown tracking-tight text-[32px] font-bold leading-tight px-4 text-center pb-2 pt-8">
+            Welcome</h2>
+        <p class="text-earth-brown-light text-base font-normal leading-normal pb-6 px-4 text-center">Sign in to identify
+            your butterfly sightings</p>
+
+        <!-- PORTFOLIO BANNER -->
+        <div class="mx-4 mb-4 p-4 bg-primary/10 border border-primary/20 rounded-xl text-center shadow-inner">
+            <p class="text-earth-brown font-bold text-sm uppercase tracking-widest mb-1 shadow-primary/5">Portfolio Access</p>
+            <p class="text-earth-brown-light text-sm">Username: <strong class="text-primary font-mono text-base bg-white/50 px-2 py-0.5 rounded">visitor@1</strong> <span class="mx-1">•</span> Password: <strong class="text-primary font-mono text-base bg-white/50 px-2 py-0.5 rounded">explore@1</strong></p>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <form method="POST" class="auth-form w-full max-w-md card-auth p-2 mb-8">
+        {% csrf_token %}
+
+        <!-- Display form errors if any -->
+        {% if form.errors %}
+        <div class="mx-4 mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-red-600 text-sm font-semibold">{{ form.errors }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Email/Username Field -->
+        <div class="flex flex-col gap-4 px-4 py-3">
+            <label class="flex flex-col w-full">
+                <p class="text-earth-brown text-sm font-semibold leading-normal pb-2">Username</p>
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary">person</span>
+                    <input name="username" type="text" required
+                        class="form-input flex w-full rounded-xl text-earth-brown focus:outline-0 focus:ring-2 focus:ring-primary/40 border border-earth-brown/10 bg-cream-bg/50 h-14 placeholder:text-earth-brown/30 pl-11 pr-4 text-base font-normal"
+                        placeholder="visitor@1" />
+                </div>
+            </label>
+        </div>
+
+        <!-- Password Field -->
+        <div class="flex flex-col gap-4 px-4 py-3">
+            <label class="flex flex-col w-full">
+                <p class="text-earth-brown text-sm font-semibold leading-normal pb-2">Password</p>
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary">lock</span>
+                    <input name="password" type="password" required
+                        class="form-input flex w-full rounded-xl text-earth-brown focus:outline-0 focus:ring-2 focus:ring-primary/40 border border-earth-brown/10 bg-cream-bg/50 h-14 placeholder:text-earth-brown/30 pl-11 pr-4 text-base font-normal"
+                        placeholder="••••••••" />
+                    <span
+                        class="material-symbols-outlined password-toggle absolute right-3 top-1/2 -translate-y-1/2 text-earth-brown/40 cursor-pointer">visibility</span>
+                </div>
+            </label>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="p-4">
+            <button type="submit" class="btn-primary w-full text-lg py-4 rounded-xl shadow-lg shadow-primary/30">
+                Sign In
+            </button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

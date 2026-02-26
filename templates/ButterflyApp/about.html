@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}About — Butterfly Classifier{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* About Page Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out both;
+    }
+    .fade-in-up-delay-1 { animation-delay: 0.1s; }
+    .fade-in-up-delay-2 { animation-delay: 0.2s; }
+    .fade-in-up-delay-3 { animation-delay: 0.3s; }
+    .fade-in-up-delay-4 { animation-delay: 0.4s; }
+    .fade-in-up-delay-5 { animation-delay: 0.5s; }
+
+    /* Floating butterfly animation */
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%      { transform: translateY(-12px) rotate(3deg); }
+    }
+    .float-anim { animation: float 4s ease-in-out infinite; }
+
+    /* Step number circle pulse */
+    @keyframes pulse-ring {
+        0%   { box-shadow: 0 0 0 0 rgba(48,172,89,0.3); }
+        70%  { box-shadow: 0 0 0 10px rgba(48,172,89,0); }
+        100% { box-shadow: 0 0 0 0 rgba(48,172,89,0); }
+    }
+    .step-circle { animation: pulse-ring 2.5s ease infinite; }
+
+    /* Stat card shine sweep */
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -75%;
+        width: 50%; height: 100%;
+        background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+        transition: left 0.6s ease;
+    }
+    .stat-card:hover::after {
+        left: 125%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Navigation Bar -->
+<nav class="bg-primary backdrop-blur-sm border-t border-white/10">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="flex gap-12 overflow-x-auto no-scrollbar justify-center">
+            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-white/60 pb-3 pt-4 whitespace-nowrap" href="{% url 'index' %}">
+                <p class="text-sm font-bold tracking-wide">Classifier</p>
+            </a>
+            <a class="flex flex-col items-center justify-center border-b-[3px] border-b-white text-white pb-3 pt-4 whitespace-nowrap" href="{% url 'about' %}">
+                <p class="text-sm font-bold tracking-wide">About</p>
+            </a>
+            
+            {% if user.is_authenticated %}
+            <!-- Logout Button (Requires form in modern Django for safety) -->
+            <form action="{% url 'logout' %}" method="post" class="flex flex-col items-center justify-center pb-3 pt-4 ml-6 pl-6 border-l border-white/20">
+                {% csrf_token %}
+                <button type="submit" class="flex items-center gap-2 text-sm font-bold tracking-wide text-white/50 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    Logout
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-screen-xl mx-auto pb-24">
+    <div class="flex flex-col p-4 gap-10 items-center">
+
+        <!-- ============================== -->
+        <!--          HERO SECTION          -->
+        <!-- ============================== -->
+        <section class="flex flex-col items-center gap-3 pt-6 fade-in-up text-center">
+            <div class="float-anim">
+                <span class="material-symbols-outlined text-primary" style="font-size:72px;">flutter_dash</span>
+            </div>
+            <h1 class="text-text-dark text-3xl font-bold leading-tight tracking-[-0.015em]">Butterfly Classifier</h1>
+            <p class="text-text-muted text-base font-medium leading-normal max-w-md">
+                Instantly identify butterfly species from a photo using deep-learning AI — trained on <strong class="text-primary">75 species</strong> from around the world.
+            </p>
+        </section>
+
+        <!-- ============================== -->
+        <!--       STAT COUNTERS ROW        -->
+        <!-- ============================== -->
+        <section class="grid grid-cols-3 gap-4 w-full max-w-lg fade-in-up fade-in-up-delay-1">
+            <!-- Species -->
+            <div class="stat-card flex flex-col items-center gap-1 bg-white rounded-2xl p-5 border border-[#EFEBE9] shadow-sm">
+                <span class="text-3xl font-bold text-primary">75</span>
+                <span class="text-[10px] font-bold text-[#8D6E63] tracking-widest uppercase">Species</span>
+            </div>
+            <!-- Regions -->
+            <div class="stat-card flex flex-col items-center gap-1 bg-white rounded-2xl p-5 border border-[#EFEBE9] shadow-sm">
+                <span class="text-3xl font-bold text-primary">6</span>
+                <span class="text-[10px] font-bold text-[#8D6E63] tracking-widest uppercase">Continents</span>
+            </div>
+            <!-- Accuracy -->
+            <div class="stat-card flex flex-col items-center gap-1 bg-white rounded-2xl p-5 border border-[#EFEBE9] shadow-sm">
+                <span class="text-3xl font-bold text-primary">AI</span>
+                <span class="text-[10px] font-bold text-[#8D6E63] tracking-widest uppercase">Powered</span>
+            </div>
+        </section>
+
+        <!-- ============================== -->
+        <!--        WHAT IT DOES CARD       -->
+        <!-- ============================== -->
+        <section class="w-full max-w-lg fade-in-up fade-in-up-delay-2">
+            <div class="bg-white rounded-3xl shadow-xl shadow-earthy-brown/5 p-6 flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-soft-green/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">center_focus_strong</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-text-dark">What It Does</h2>
+                </div>
+                <p class="text-[#5D4037] text-sm leading-relaxed font-medium">
+                    Upload a photo of any butterfly and the classifier will predict its species in seconds.
+                    You'll receive the <strong>common name</strong>, <strong>scientific name</strong>, a confidence score,
+                    and rich details — including its natural <strong>habitat</strong> and the <strong>regions</strong>
+                    where it's commonly found.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================== -->
+        <!--      TECHNOLOGY CARD           -->
+        <!-- ============================== -->
+        <section class="w-full max-w-lg fade-in-up fade-in-up-delay-3">
+            <div class="bg-white rounded-3xl shadow-xl shadow-earthy-brown/5 p-6 flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-soft-green/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">memory</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-text-dark">Under the Hood</h2>
+                </div>
+                <p class="text-[#5D4037] text-sm leading-relaxed font-medium">
+                    The model is a <strong>ResNet-50</strong> convolutional neural network, exported to
+                    <strong>TensorFlow Lite</strong> for fast, lightweight inference.
+                    Images are resized to <strong>224 × 224 px</strong>, preprocessed with Caffe-style mean subtraction,
+                    and classified via softmax to produce a confidence-ranked prediction across all 75 classes.
+                </p>
+
+                <!-- Tech pills -->
+                <div class="flex flex-wrap gap-2 mt-1">
+                    <span class="px-3 py-1 rounded-full bg-soft-green/10 text-primary text-xs font-bold">ResNet-50</span>
+                    <span class="px-3 py-1 rounded-full bg-soft-green/10 text-primary text-xs font-bold">TensorFlow Lite</span>
+                    <span class="px-3 py-1 rounded-full bg-soft-green/10 text-primary text-xs font-bold">Django</span>
+                    <span class="px-3 py-1 rounded-full bg-soft-green/10 text-primary text-xs font-bold">Python</span>
+                    <span class="px-3 py-1 rounded-full bg-soft-green/10 text-primary text-xs font-bold">Pillow</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================== -->
+        <!--      HOW TO USE SECTION        -->
+        <!-- ============================== -->
+        <section class="w-full max-w-lg fade-in-up fade-in-up-delay-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-earthy-brown/5 p-6 flex flex-col gap-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-soft-green/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">steps</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-text-dark">How to Use</h2>
+                </div>
+
+                <!-- Step 1 -->
+                <div class="flex items-start gap-4">
+                    <div class="step-circle flex-shrink-0 w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">1</div>
+                    <div>
+                        <p class="font-bold text-text-dark text-sm">Upload a Photo</p>
+                        <p class="text-[#8D6E63] text-xs leading-relaxed">Go to the <strong>Classifier</strong> tab and select or snap a photo of a butterfly.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="flex items-start gap-4">
+                    <div class="step-circle flex-shrink-0 w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</div>
+                    <div>
+                        <p class="font-bold text-text-dark text-sm">Predict Species</p>
+                        <p class="text-[#8D6E63] text-xs leading-relaxed">Hit <strong>Predict Species</strong> — the AI analyses the image in real time.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="flex items-start gap-4">
+                    <div class="step-circle flex-shrink-0 w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">3</div>
+                    <div>
+                        <p class="font-bold text-text-dark text-sm">Learn & Explore</p>
+                        <p class="text-[#8D6E63] text-xs leading-relaxed">Get the species name, confidence score, habitat, and region — all on a beautiful result card.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================== -->
+        <!--      SPECIES COVERAGE          -->
+        <!-- ============================== -->
+        <section class="w-full max-w-lg fade-in-up fade-in-up-delay-5">
+            <div class="bg-white rounded-3xl shadow-xl shadow-earthy-brown/5 p-6 flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-soft-green/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">diversity_3</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-text-dark">Species Coverage</h2>
+                </div>
+                <p class="text-[#5D4037] text-sm leading-relaxed font-medium">
+                    The model can classify <strong>75 butterfly species</strong> spanning families like
+                    Swallowtails, Monarchs, Morphos, Heliconians, Hairstreaks, Skippers, and more.
+                    Each species includes curated data — from the iconic <em>Blue Morpho</em>
+                    of the Amazon rainforest to the <em>Adonis Blue</em> of European chalk grasslands.
+                </p>
+
+                <!-- Sample species pills -->
+                <div class="flex flex-wrap gap-2 mt-1">
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Blue Morpho</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Monarch</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Painted Lady</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Zebra Long Wing</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Peacock</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">🦋 Red Admiral</span>
+                    <span class="px-3 py-1 rounded-full bg-[#EFEBE9] text-[#5D4037] text-xs font-semibold">+ 69 more</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================== -->
+        <!--         CTA BUTTON             -->
+        <!-- ============================== -->
+        <a href="{% url 'index' %}"
+           class="mt-2 flex items-center justify-center gap-2 rounded-full h-14 px-10 bg-primary text-white text-lg font-bold shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all decoration-transparent fade-in-up fade-in-up-delay-5">
+            <span class="material-symbols-outlined">photo_camera</span>
+            Try the Classifier
+        </a>
+
+    </div>
+</main>
+
+{% endblock %}

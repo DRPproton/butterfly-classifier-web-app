@@ -1,6 +1,22 @@
-/.butterflyenv
-.butterflyenv
+# Environments
 .env
 .venv
+venv/
+env/
+.butterflyenv/
 
-media
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django static & media
+staticfiles/
+media/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# NOTE: db.sqlite3 is deliberately left OUT of this list so it gets pushed to GitHub 
+# with all your current portfolio users and passwords intact.

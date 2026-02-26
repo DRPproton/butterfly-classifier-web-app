@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Butterfly Classifier</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind Configuration -->
+    <script src="js/tailwind-config.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/butterfly-theme.css" />
+</head>
+<body class="bg-cream-bg min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <nav class="bg-primary backdrop-blur-sm border-t border-white/10 flex-shrink-0 z-10 relative">
+        <div class="max-w-screen-xl mx-auto px-4">
+            <div class="flex gap-12 overflow-x-auto no-scrollbar justify-center">
+                <a class="flex flex-col items-center justify-center border-b-[3px] border-b-white text-white pb-3 pt-4 whitespace-nowrap" href="index.html">
+                    <p class="text-sm font-bold tracking-wide">Classifier</p>
+                </a>
+                <a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-white/60 pb-3 pt-4 whitespace-nowrap" href="about.html">
+                    <p class="text-sm font-bold tracking-wide">About</p>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-screen-xl mx-auto pb-24 w-full flex-grow relative z-10">
+        <div class="flex flex-col p-4 gap-8">      
+            <div class="flex flex-col gap-4 justify-center items-center text-center mt-6">
+                <h1 class="text-text-dark text-3xl font-bold leading-tight tracking-[-0.015em]">Butterfly Classifier</h1>
+                <p class="text-text-muted text-base font-normal leading-normal">Classify butterflies with AI</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div id="error-message" class="hidden mb-2 w-full max-w-md mx-auto bg-red-50 border-l-4 border-red-500 p-4 rounded-r shadow-sm animate-fade-in-up">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <span class="material-symbols-outlined text-red-500">error</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700 font-bold">Prediction Failed</p>
+                        <p id="error-text" class="text-sm text-red-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="upload-section" class="flex flex-col items-center w-full">
+                <!-- Upload Form -->
+                <form id="upload-form" class="w-full max-w-md mt-2">
+                    <div class="flex flex-col items-center gap-6 rounded-xl border-2 border-dashed border-soft-green bg-white/40 px-6 py-10 transition-colors hover:bg-white/60 active:bg-soft-green/10 relative cursor-pointer" onclick="document.getElementById('image-upload').click()">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-16 h-16 rounded-full bg-soft-green/20 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-4xl">add_a_photo</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 text-center">
+                                <p class="text-lg font-bold text-text-dark">Upload Butterfly Image</p>
+                                <p class="text-sm font-medium text-text-muted max-w-[240px]">Snap a photo of the butterfly to begin identification</p>
+                            </div>
+                        </div>
+                        <input type="file" id="image-upload" name="image" accept="image/*" class="hidden">
+                        <button type="button"
+                            class="flex min-w-[180px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-white text-base font-bold shadow-lg active:scale-95 transition-transform pointer-events-none">
+                            <span class="truncate">Select Image</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Image Preview Container (Initially Hidden) -->
+                <div id="preview-container" class="hidden flex-col items-center gap-4 w-full max-w-md animate-fade-in-up">
+                    <div class="rounded-2xl overflow-hidden border border-soft-green/20 shadow-lg w-full">
+                        <img id="image-preview" src="#" alt="Butterfly Preview" class="w-full h-64 object-cover">
+                    </div>
+                    
+                    <!-- Predict Button -->
+                    <button type="button" id="predict-btn" 
+                            class="px-8 py-3 bg-primary text-white rounded-full font-bold text-lg shadow-xl hover:scale-105 transition-transform active:scale-95 flex items-center gap-2 mt-4">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span id="predict-btn-text">Predict Species</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESULT SCREEN (Initially Hidden) -->
+            <section id="result-section" class="hidden flex-col gap-6 animate-fade-in-up w-full max-w-md mx-auto">
+                <!-- Header Row -->
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-[#3E2723]">Result</h2>
+                    <span class="text-[10px] font-extrabold px-3 py-1 bg-primary text-white rounded-full tracking-widest uppercase">Match Found</span>
+                </div>
+
+                <!-- Main Card -->
+                <div class="flex flex-col rounded-3xl overflow-hidden bg-white shadow-xl shadow-earthy-brown/5">
+                    <!-- Image -->
+                    <div id="result-image" class="w-full aspect-[4/3] bg-cover bg-center relative"></div>
+                    
+                    <!-- Content -->
+                    <div class="flex flex-col gap-4 p-6 pt-5">
+                        <!-- Title Row -->
+                        <div class="flex justify-between items-baseline">
+                            <h1 id="result-name" class="text-3xl font-bold text-primary capitalize">Name</h1>
+                            <div class="flex flex-col items-end">
+                                <span id="result-confidence" class="text-xl font-bold text-primary">0%</span>
+                                <span class="text-[10px] text-text-muted font-bold tracking-wider uppercase">Confidence</span>
+                            </div>
+                        </div>
+
+                        <!-- Scientific Name -->
+                        <p id="result-scientific-name" class="text-lg font-serif italic text-[#8D6E63] -mt-2">Scientific</p>
+
+                        <!-- Description -->
+                        <p id="result-description" class="text-[#5D4037] text-sm leading-relaxed font-medium">
+                            Desc
+                        </p>
+
+                        <!-- Buttons Row -->
+                        <div class="flex items-center justify-center gap-3 mt-4">
+                            <button onclick="resetApp()" class="flex items-center justify-center rounded-xl h-12 w-full bg-[#EFEBE9] text-[#3E2723] text-sm font-bold hover:bg-[#D7CCC8] transition-colors decoration-transparent px-4">
+                                Predict New Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Cards Row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Habitat Card -->
+                    <div class="bg-[#FFFCF9] rounded-2xl p-5 border border-[#EFEBE9] flex flex-col gap-2">
+                        <span class="material-symbols-outlined text-primary">leaf_spark</span>
+                        <span class="text-[10px] font-bold text-[#8D6E63] tracking-widest uppercase mt-1">Habitat</span>
+                        <p id="result-habitat" class="text-[#3E2723] font-bold text-sm leading-tight">Habitat</p>
+                    </div>
+
+                    <!-- Common In Card -->
+                    <div class="bg-[#FFFCF9] rounded-2xl p-5 border border-[#EFEBE9] flex flex-col gap-2">
+                        <span class="material-symbols-outlined text-primary">location_on</span>
+                        <span class="text-[10px] font-bold text-[#8D6E63] tracking-widest uppercase mt-1">Common In</span>
+                        <p id="result-common-in" class="text-[#3E2723] font-bold text-sm leading-tight">Common In</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Decorative Butterfly Watermark -->
+    <div class="butterfly-watermark fixed -bottom-[100px] -right-[100px] opacity-[0.03] pointer-events-none overflow-hidden z-0">
+        <span class="material-symbols-outlined text-[400px] text-primary">flutter_dash</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/auth-interactions.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

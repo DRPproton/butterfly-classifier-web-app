@@ -1,9 +1,12 @@
+import functions_framework
+import os
 from pathlib import Path
 from PIL import Image
 import numpy as np
-import gc
+import io
+import json
 
-# Handle Windows vs Linux TFLite imports
+# Handle Windows vs Linux TFLite imports (Functions use Linux usually, but this is safe)
 try:
     import tflite_runtime.interpreter as tflite
     Interpreter = tflite.Interpreter
@@ -11,10 +14,16 @@ except ImportError:
     import tensorflow as tf
     Interpreter = tf.lite.Interpreter
 
+# Import the butterfly details dictionary 
+try:
+    from butterfly_details import BUTTERFLY_DETAILS
+except ImportError:
+    BUTTERFLY_DETAILS = {}
+
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "butterfly-model.tflite"
 
-# Initialize Interpreter
+# Initialize Interpreter during cold start
 interpreter = Interpreter(model_path=str(MODEL_PATH))
 interpreter.allocate_tensors()
 
@@ -43,102 +52,84 @@ classes = [
 ]
 
 def preprocess_image(img):
-    """
-    Manual ResNet50 preprocessing (Caffe style).
-    1. Resize to 224x224
-    2. Convert to float32 numpy array
-    3. RGB -> BGR
-    4. Subtract Mean
-    """
-    # 1. Resize to target size
+    # Resize to target size
     img = img.resize((224, 224), Image.NEAREST)
-    
-    # 2. Convert to numpy array
+    # Convert to numpy array
     x = np.array(img, dtype='float32')
-    
-    # 3. RGB -> BGR (reverse channels)
+    # RGB -> BGR (reverse channels)
     x = x[..., ::-1]
-    
-    # 4. Subtract Mean (ImageNet weights)
-    # [103.939, 116.779, 123.68]
+    # Subtract Mean (ImageNet weights)
     mean = [103.939, 116.779, 123.68]
     x[..., 0] -= mean[0]
     x[..., 1] -= mean[1]
     x[..., 2] -= mean[2]
-    
-    # 5. Add Batch Dimension (1, 224, 224, 3)
+    # Add Batch Dimension (1, 224, 224, 3)
     x = np.expand_dims(x, axis=0)
     return x
 
-def _predict_array(X):
+def predict_from_memory(img_obj) -> str:
+    img = img_obj.convert('RGB')
+    X = preprocess_image(img)
+    
     interpreter.set_tensor(input_idx, X)
     interpreter.invoke()
     output = interpreter.get_tensor(output_idx)
     
-    # Flatten to ensure we have a 1D array of probabilities
     preds = output.flatten()
-
     exp_preds = np.exp(preds - np.max(preds))
     preds = exp_preds / exp_preds.sum()
     
-    # Find index of max probability
     idx = preds.argmax()
-    
-    # Return class name
     return classes[int(idx)], float(preds[idx])
 
-def predict_from_memory(img_obj) -> str:
-    """
-    Predict butterfly species directly from a PIL Image object.
-    """
-    try:
-        img = img_obj.convert('RGB')
-        X = preprocess_image(img)
-        return _predict_array(X)
-    except Exception:
-        raise
 
-# --- Predict from local file ---
-def predict_from_file(path: str) -> str:
-    """
-    Predict butterfly species from a local image file.
-    Opens with PIL to ensure file is closed after reading.
-    """
-    img_path = Path(path)
-    if not img_path.is_file():
-        raise FileNotFoundError(f"File not found: {path}")
-
-    # Open with PIL and force load to memory so we can close the file handle
-    # This prevents Windows [WinError 32] file locking issues
-    try:
-        with Image.open(img_path) as img:
-            return predict_from_memory(img)
-    finally:
-        # Force garbage collection to ensure file handles are released
-        gc.collect()
-
-if __name__ == "__main__":
-    print("🦋 Butterfly Classifier Model")
-    print(f"Model Path: {MODEL_PATH}")
+@functions_framework.http
+def predict(request):
+    """HTTP Cloud Function to classify butterfly image."""
     
-    # Simple Health Check
+    # Set CORS headers for the preflight request
+    if request.method == 'OPTIONS':
+        # Allows GET requests from any origin with the Content-Type
+        # header and caches preflight response for an 3600s
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS, POST',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '3600'
+        }
+        return ('', 204, headers)
+
+    # Set CORS headers for the main request
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    }
+
     try:
-        details = interpreter.get_input_details()
-        print(f"✅ Model loaded successfully!")
-        print(f"   Input Shape: {details[0]['shape']}")
-        print(f"   Ready for Django integration.")
+        if 'image' not in request.files:
+            return (json.dumps({'error': 'No image provided'}), 400, headers)
+        
+        file = request.files.get('image')
+        image_bytes = file.read()
+        
+        # Open image from bytes
+        img = Image.open(io.BytesIO(image_bytes))
+        
+        # Predict
+        predicted_class, confidence_val = predict_from_memory(img)
+        
+        # Get metadata
+        details = BUTTERFLY_DETAILS.get(predicted_class, {})
+        
+        response_data = {
+            'prediction': predicted_class.title(),
+            'confidence': f"{confidence_val * 100:.1f}%",
+            'scientific_name': details.get('scientific', 'Unknown'),
+            'description': details.get('desc', 'No description available.'),
+            'habitat': details.get('habitat', 'Unknown'),
+            'common_in': details.get('common', 'Unknown')
+        }
+        
+        return (json.dumps(response_data), 200, headers)
+        
     except Exception as e:
-        print(f"❌ Error loading model: {e}")
-    
-    test_image_path = r"media/Adonis-Blue-James-Gould-2017-crop.webp"
-    try:
-        if Path(test_image_path).exists():
-            print(f"Testing with file: {test_image_path}")
-            result = predict_from_file(test_image_path)
-            print(f"✅ Prediction: {result}")
-        else:
-            print(f"ℹ️  Test image not found (skipped local test): {test_image_path}")
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
+        return (json.dumps({'error': str(e)}), 500, headers)

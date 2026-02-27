@@ -2,7 +2,7 @@
 
 // URL of your deployed Google Cloud Function
 // Update this once you deploy the function to GCP
-const GCP_FUNCTION_URL = 'http://localhost:8080';
+const GCP_FUNCTION_URL = 'https://us-central1-vocal-tracker-387016.cloudfunctions.net/butterfly-classifier';
 
 document.getElementById('image-upload').onchange = function (event) {
     const file = event.target.files[0];
